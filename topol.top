@@ -1,0 +1,13 @@
+#include "ff.itp"
+#include "choli.itp"
+#include "gg.itp"
+ 
+[ system ]
+choli gg
+ 
+ 
+[ molecules ]
+choli      2
+gg      2
+
+test
