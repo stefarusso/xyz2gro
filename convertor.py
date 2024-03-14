@@ -3,8 +3,9 @@
 filename_topol = "topol.top"
 filename_xyz = "simbox.xyz"
 filename_output = "simbox.gro"
+
 #in angstrom
-box_length = 20
+box_length = 40.5
 
 #EXTRACT INFO OF THE BOX
 #like order of molecules and their number
@@ -35,7 +36,9 @@ def extract_mol_type(filename):
             if "atoms" in line:
                 found=True
             if found:
-                #stop at the first empty line
+                #i need to skip the line [ atoms ]
+                #stop at the first empty [???] line
+                #if not line.strip():
                 if not line.strip():
                     break
                 line=line.strip().split()
@@ -46,7 +49,6 @@ def extract_mol_type(filename):
 atom_types=[]
 for mol in mols_name:
     atom_types.append(extract_mol_type(str(mol)+".itp"))
-
 
 #Extract all the atoms coordinates from xyz
 with open(filename_xyz) as file:
@@ -88,16 +90,12 @@ with open(filename_output,"w") as file:
             mol_counter += 1
             for atom in atom_types_slice:
                 atom_counter += 1
-                line_strings.append(f'{mol_counter:>5d}{mol:<5s}{atom:>5s}{atom_counter:>5d}')
+                line_strings.append(f'{mol_counter:>5d}{mol[:5]:<5s}{atom[:5]:>5s}{atom_counter:>5d}')
+                if len(mol)>5 or len(atom)>5 :
+                        print("Carefull molecule name or atom name have been clipped because longer than 5 characters!!!!!!!!" + mol +" " + atom + " " )
+                        print("Check ITP file")
     #add the x,y,z to the strings
     for line,atom_x,atom_y,atom_z in zip(line_strings,x,y,z):
         #xyz are angstrom so we need to multiply 0.1 for having nanometers
         file.write(f'{line}{float(atom_x)*0.1:>8.3f}{float(atom_y)*0.1:>8.3f}{float(atom_z)*0.1:>8.3f}\n')
     file.write(f'{box_length*0.1:8.3f} {box_length*0.1:8.3f} {box_length*0.1:8.3f} ')
-
-
-
-
-
-
-
