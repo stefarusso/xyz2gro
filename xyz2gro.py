@@ -25,7 +25,8 @@ def convert(filename_topol = "topol.top",
                 mols_n.append(line[1])
 
     def extract_mol_type(filename):
-        mol1_list=[]
+        atom_list=[]
+        residue_list=[]
         with open(filename,"r") as file:
             found=False
             for line in file:
@@ -40,12 +41,17 @@ def convert(filename_topol = "topol.top",
                         break
                     line=line.strip().split()
                     if line[0].isnumeric():
-                        mol1_list.append(line[4])
-        return mol1_list
+                        atom_list.append(line[4])
+                        residue_list.append(line[3])
+        return atom_list,residue_list
 
     atom_types=[]
+    residue_types=[]
     for mol in mols_name:
-        atom_types.append(extract_mol_type(str(mol)+".itp"))
+        atoms, residues = extract_mol_type(str(mol)+".itp")
+        atom_types.append(atoms)
+        residue_types.append(residues)
+
 
     #Extract all the atoms coordinates from xyz
     with open(filename_xyz) as file:
@@ -84,10 +90,11 @@ def convert(filename_topol = "topol.top",
             for i in range(n_mol):
                 #repeat the cycle n times for the same molecule
                 atom_types_slice = atom_types[mol_idx]
+                residue_types_slice = residue_types[mol_idx]
                 mol_counter += 1
-                for atom in atom_types_slice:
+                for atom,residue in zip(atom_types_slice,residue_types_slice):
                     atom_counter += 1
-                    line_strings.append(f'{mol_counter:>5d}{mol[:5]:<5s}{atom[:5]:>5s}{atom_counter:>5d}')
+                    line_strings.append(f'{mol_counter:>5d}{residue[:5]:<5s}{atom[:5]:>5s}{atom_counter:>5d}')
                     if len(mol)>5 or len(atom)>5 :
                         print("Carefull molecule name or atom name have been clipped because longer than 5 characters!!!!!!!!" + mol +" " + atom + " " )
                         print("Check ITP file")
